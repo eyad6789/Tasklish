@@ -27,11 +27,29 @@ def init_db():
         CREATE TABLE IF NOT EXISTS tasks (
             id INTEGER PRIMARY KEY,
             title TEXT NOT NULL,
+            description TEXT DEFAULT '',
             status TEXT NOT NULL,
             estimated_time TEXT,
+            labels TEXT DEFAULT '[]',
             created_at TEXT NOT NULL
         )
     ''')
+    
+    # Add new columns to existing tables if they don't exist
+    try:
+        cursor.execute("ALTER TABLE tasks ADD COLUMN description TEXT DEFAULT ''")
+    except:
+        pass  # Column already exists
+    
+    try:
+        cursor.execute("ALTER TABLE tasks ADD COLUMN labels TEXT DEFAULT '[]'")
+    except:
+        pass  # Column already exists
+    
+    try:
+        cursor.execute("ALTER TABLE tasks ADD COLUMN completed_at TEXT")
+    except:
+        pass  # Column already exists
     
     # Subtasks table
     cursor.execute('''
@@ -101,11 +119,24 @@ def get_tasks():
         cursor.execute('SELECT * FROM subtasks WHERE task_id = ?', (task['id'],))
         subtasks = cursor.fetchall()
         
+        # Get description and labels safely (may not exist in old databases)
+        try:
+            description = task['description'] or ''
+        except (KeyError, IndexError):
+            description = ''
+        
+        try:
+            labels = json.loads(task['labels']) if task['labels'] else []
+        except (KeyError, IndexError):
+            labels = []
+        
         result.append({
             'id': task['id'],
             'title': task['title'],
+            'description': description,
             'status': task['status'],
             'estimatedTime': task['estimated_time'],
+            'labels': labels,
             'createdAt': task['created_at'],
             'subtasks': [dict(st) for st in subtasks]
         })
@@ -123,13 +154,15 @@ def create_task():
     try:
         # Insert task
         cursor.execute('''
-            INSERT INTO tasks (id, title, status, estimated_time, created_at)
-            VALUES (?, ?, ?, ?, ?)
+            INSERT INTO tasks (id, title, description, status, estimated_time, labels, created_at)
+            VALUES (?, ?, ?, ?, ?, ?, ?)
         ''', (
             data['id'],
             data['title'],
+            data.get('description', ''),
             data['status'],
             data['estimatedTime'],
+            json.dumps(data.get('labels', [])),
             data['createdAt']
         ))
         
@@ -161,15 +194,24 @@ def update_task(task_id):
     cursor = conn.cursor()
     
     try:
+        # Set completed_at if task is being marked as done
+        completed_at = None
+        if data['status'] == 'done':
+            from datetime import datetime
+            completed_at = datetime.utcnow().isoformat() + 'Z'
+        
         # Update task
         cursor.execute('''
             UPDATE tasks
-            SET title = ?, status = ?, estimated_time = ?
+            SET title = ?, description = ?, status = ?, estimated_time = ?, labels = ?, completed_at = ?
             WHERE id = ?
         ''', (
             data['title'],
+            data.get('description', ''),
             data['status'],
             data['estimatedTime'],
+            json.dumps(data.get('labels', [])),
+            completed_at,
             task_id
         ))
         
@@ -207,6 +249,75 @@ def delete_task(task_id):
     conn.close()
     
     return jsonify({"message": "Task deleted successfully"})
+
+@app.route('/api/tasks/history', methods=['GET'])
+def get_task_history():
+    """Get completed tasks grouped by month"""
+    conn = get_db()
+    cursor = conn.cursor()
+    
+    # Get all completed tasks
+    cursor.execute('''
+        SELECT * FROM tasks 
+        WHERE status = 'done' 
+        ORDER BY completed_at DESC, created_at DESC
+    ''')
+    tasks = cursor.fetchall()
+    
+    # Group by month
+    history = {}
+    for task in tasks:
+        # Get subtasks
+        cursor.execute('SELECT * FROM subtasks WHERE task_id = ?', (task['id'],))
+        subtasks = cursor.fetchall()
+        
+        # Determine completion month
+        try:
+            completed_date = task['completed_at'] or task['created_at']
+        except (KeyError, IndexError):
+            completed_date = task['created_at']
+            
+        try:
+            from datetime import datetime
+            dt = datetime.fromisoformat(completed_date.replace('Z', '+00:00'))
+            month_key = dt.strftime('%Y-%m')
+            month_name = dt.strftime('%B %Y')
+        except:
+            month_key = 'unknown'
+            month_name = 'Unknown'
+        
+        if month_key not in history:
+            history[month_key] = {
+                'month': month_name,
+                'count': 0,
+                'tasks': []
+            }
+        
+        # Get description and labels safely
+        try:
+            description = task['description'] or ''
+        except (KeyError, IndexError):
+            description = ''
+        
+        try:
+            labels = json.loads(task['labels']) if task['labels'] else []
+        except (KeyError, IndexError):
+            labels = []
+        
+        history[month_key]['count'] += 1
+        history[month_key]['tasks'].append({
+            'id': task['id'],
+            'title': task['title'],
+            'description': description,
+            'estimatedTime': task['estimated_time'],
+            'labels': labels,
+            'completedAt': completed_date,
+            'createdAt': task['created_at'],
+            'subtasks': [dict(st) for st in subtasks]
+        })
+    
+    conn.close()
+    return jsonify(history)
 
 # Habits endpoints
 @app.route('/api/habits', methods=['GET'])
