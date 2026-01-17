@@ -378,6 +378,7 @@
             transition: all 0.3s ease;
             background: var(--dark-lighter);
             color: var(--text-primary);
+            scroll-margin-top: 100px;
         }
 
         .task-input:focus {
@@ -899,6 +900,7 @@
             align-items: center;
             justify-content: center;
             animation: fadeInModal 0.3s ease;
+            overflow-y: auto;
         }
 
         @keyframes fadeInModal {
@@ -915,6 +917,10 @@
             display: flex;
         }
 
+        body.modal-open {
+            overflow: hidden;
+        }
+
         .modal-content {
             background: var(--dark-light);
             border-radius: 24px;
@@ -926,6 +932,7 @@
             box-shadow: 0 30px 80px rgba(0, 0, 0, 0.5);
             animation: slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1);
             border: 1px solid var(--border-color);
+            margin: auto;
         }
 
         @keyframes slideUp {
@@ -996,6 +1003,7 @@
             transition: all 0.3s ease;
             background: var(--dark-lighter);
             color: var(--text-primary);
+            scroll-margin-top: 100px;
         }
 
         .label-checkbox {
@@ -1036,6 +1044,102 @@
             outline: none;
             border-color: var(--primary);
             box-shadow: 0 8px 25px rgba(255, 107, 107, 0.15);
+        }
+
+        .labels-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+        }
+
+        .label-chip {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 12px 16px;
+            border-radius: 10px;
+            font-size: 13px;
+            font-weight: 700;
+            color: white;
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            border: 2px solid transparent;
+            opacity: 0.5;
+            cursor: pointer;
+        }
+
+        .label-chip i {
+            width: 16px;
+            height: 16px;
+        }
+
+        .label-checkbox input[type="checkbox"]:checked+.label-chip {
+            opacity: 1;
+            border-color: rgba(255, 255, 255, 0.3);
+            transform: scale(1.05);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .label-checkbox:hover .label-chip {
+            opacity: 0.8;
+            transform: translateY(-2px);
+        }
+
+        /* Label color schemes */
+        .label-urgent {
+            background: linear-gradient(135deg, #fa5252 0%, #e03131 100%);
+        }
+
+        .label-important {
+            background: linear-gradient(135deg, #ffd43b 0%, #fab005 100%);
+        }
+
+        .label-bug {
+            background: linear-gradient(135deg, #ff922b 0%, #fd7e14 100%);
+        }
+
+        .label-feature {
+            background: linear-gradient(135deg, #a78bfa 0%, #8b5cf6 100%);
+        }
+
+        .label-design {
+            background: linear-gradient(135deg, #f06595 0%, #e64980 100%);
+        }
+
+        .label-backend {
+            background: linear-gradient(135deg, #4c6ef5 0%, #4263eb 100%);
+        }
+
+        .label-frontend {
+            background: linear-gradient(135deg, #51cf66 0%, #40c057 100%);
+        }
+
+        .label-testing {
+            background: linear-gradient(135deg, #22b8cf 0%, #15aabf 100%);
+        }
+
+        /* Task card labels */
+        .task-labels {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin-top: 12px;
+        }
+
+        .task-label {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 700;
+            color: white;
+        }
+
+        .task-label i {
+            width: 12px;
+            height: 12px;
         }
 
         .save-btn {
@@ -1222,52 +1326,11 @@
                 </div>
 
                 <div class="task-input-area">
-                    <div class="input-wrapper">
-                        <textarea id="taskInput" class="task-input"
-                            placeholder="Describe your task naturally... e.g., 'Handle invoice for client X with packaging and certificates'"></textarea>
-                        <div class="sparkles">
-                            <i data-lucide="sparkles"></i>
-                        </div>
-                    </div>
-
-                    <!-- Additional Task Details -->
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 15px;">
-                        <div>
-                            <label
-                                style="display: block; margin-bottom: 8px; font-size: 13px; color: var(--text-secondary); font-weight: 600;">Description
-                                (Optional)</label>
-                            <textarea id="taskDescription" class="form-input" placeholder="Add task description..."
-                                style="min-height: 80px; resize: vertical;"></textarea>
-                        </div>
-                        <div>
-                            <label
-                                style="display: block; margin-bottom: 8px; font-size: 13px; color: var(--text-secondary); font-weight: 600;">Labels
-                                (Optional)</label>
-                            <select id="taskLabels" class="form-input" multiple style="min-height: 80px;">
-                                <option value="Urgent">🔴 Urgent</option>
-                                <option value="Important">⭐ Important</option>
-                                <option value="Bug">🐛 Bug</option>
-                                <option value="Feature">✨ Feature</option>
-                                <option value="Design">🎨 Design</option>
-                                <option value="Backend">⚙️ Backend</option>
-                                <option value="Frontend">💻 Frontend</option>
-                                <option value="Testing">🧪 Testing</option>
-                            </select>
-                            <small
-                                style="display: block; margin-top: 5px; font-size: 11px; color: var(--text-secondary);">Hold
-                                Ctrl/Cmd to select multiple</small>
-                        </div>
-                    </div>
-
-                    <div style="display: flex; gap: 10px; margin-top: 15px;">
-                        <button class="add-task-btn" onclick="createTaskWithAI()" id="addTaskBtn" style="flex: 1;">
-                            <span id="btnText"><i data-lucide="sparkles"></i> Create with AI Magic</span>
-                        </button>
-                        <button class="btn-secondary" onclick="createTaskManually()"
-                            style="flex: 1; padding: 18px 24px; border-radius: 16px; font-weight: 700; font-size: 15px; display: flex; align-items: center; justify-content: center; gap: 8px;">
-                            <i data-lucide="plus-circle"></i> Create Manually
-                        </button>
-                    </div>
+                    <button class="add-task-btn" onclick="openTaskModal()"
+                        style="width: 100%; padding: 20px 30px; display: flex; align-items: center; justify-content: center; gap: 12px;">
+                        <i data-lucide="plus-circle" style="width: 24px; height: 24px;"></i>
+                        <span style="font-size: 18px; font-weight: 700;">Add New Task</span>
+                    </button>
                 </div>
 
                 <div class="task-columns">
@@ -1354,6 +1417,49 @@
         </div>
     </div>
 
+    <!-- Task Creation Modal -->
+    <div class="modal" id="taskModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="modal-title">Create New Task</div>
+                <button class="close-btn" onclick="closeTaskModal()">×</button>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Task Title</label>
+                <textarea id="taskInput" class="form-input"
+                    placeholder="Describe your task naturally... e.g., 'Handle invoice for client X with packaging and certificates'"
+                    style="min-height: 100px; resize: vertical;"></textarea>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Description (Optional)</label>
+                <textarea id="taskDescription" class="form-input" placeholder="Add task description..."
+                    style="min-height: 80px; resize: vertical;"></textarea>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Labels (Optional)</label>
+                <div id="taskLabelsGrid" class="labels-grid">
+                    <!-- Labels will be generated by JavaScript -->
+                </div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 25px;">
+                <button class="save-btn" onclick="createTaskWithAI()" id="addTaskBtn"
+                    style="display: flex; align-items: center; justify-content: center; gap: 8px;">
+                    <i data-lucide="sparkles" style="width: 18px; height: 18px;"></i>
+                    <span id="btnText">AI Magic</span>
+                </button>
+                <button class="save-btn" onclick="createTaskManually()"
+                    style="background: linear-gradient(135deg, var(--secondary) 0%, #3ba89e 100%); display: flex; align-items: center; justify-content: center; gap: 8px;">
+                    <i data-lucide="plus-circle" style="width: 18px; height: 18px;"></i>
+                    <span>Manual</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
     <script>
         // Storage keys
         const STORAGE_KEYS = {
@@ -1373,6 +1479,18 @@
         let habitHistory = {};
         let apiKey = 'AIzaSyAD4s507232VMpW0aMbKaUVqJD9qTDbbCk'; // Pre-configured API key
 
+        // Label configuration with icons
+        const LABELS = [
+            { value: 'Urgent', icon: 'alert-circle', color: 'urgent' },
+            { value: 'Important', icon: 'star', color: 'important' },
+            { value: 'Bug', icon: 'bug', color: 'bug' },
+            { value: 'Feature', icon: 'sparkles', color: 'feature' },
+            { value: 'Design', icon: 'palette', color: 'design' },
+            { value: 'Backend', icon: 'server', color: 'backend' },
+            { value: 'Frontend', icon: 'monitor', color: 'frontend' },
+            { value: 'Testing', icon: 'flask-conical', color: 'testing' }
+        ];
+
         // Initialize app
         async function init() {
             await loadData();
@@ -1380,6 +1498,38 @@
             renderHabits();
             renderCalendar();
             checkDailyReset();
+            initializeLabelsGrid();
+        }
+
+        // Initialize labels grid in task modal
+        function initializeLabelsGrid() {
+            const grid = document.getElementById('taskLabelsGrid');
+            grid.innerHTML = LABELS.map(label => `
+                <label class="label-checkbox">
+                    <input type="checkbox" value="${label.value}" data-label="${label.value}">
+                    <div class="label-chip label-${label.color}">
+                        <i data-lucide="${label.icon}"></i>
+                        <span>${label.value}</span>
+                    </div>
+                </label>
+            `).join('');
+            lucide.createIcons();
+        }
+
+        // Task Modal Functions
+        function openTaskModal() {
+            document.getElementById('taskModal').classList.add('active');
+            document.body.classList.add('modal-open');
+            // Clear previous inputs
+            document.getElementById('taskInput').value = '';
+            document.getElementById('taskDescription').value = '';
+            document.querySelectorAll('#taskLabelsGrid input[type="checkbox"]').forEach(cb => cb.checked = false);
+            lucide.createIcons();
+        }
+
+        function closeTaskModal() {
+            document.getElementById('taskModal').classList.remove('active');
+            document.body.classList.remove('modal-open');
         }
 
         // Load data from storage or backend
@@ -1577,6 +1727,7 @@
         // Create task with AI
         async function createTaskWithAI() {
             const input = document.getElementById('taskInput');
+            const descriptionInput = document.getElementById('taskDescription');
             const taskDescription = input.value.trim();
 
             if (!taskDescription) {
@@ -1599,11 +1750,17 @@
             try {
                 const breakdown = await breakdownTaskWithAI(taskDescription);
 
+                // Get selected labels from checkboxes
+                const selectedLabels = Array.from(document.querySelectorAll('#taskLabelsGrid input[type="checkbox"]:checked'))
+                    .map(checkbox => checkbox.value);
+
                 const newTask = {
                     id: Date.now(),
                     title: breakdown.mainTask,
+                    description: descriptionInput.value.trim(),
                     status: 'todo',
                     estimatedTime: breakdown.estimatedTime,
+                    labels: selectedLabels,
                     subtasks: breakdown.subtasks.map((st, idx) => ({
                         id: Date.now() + idx + 1,
                         title: st.title,
@@ -1622,13 +1779,17 @@
                 }
 
                 renderTasks();
+                // Clear inputs and close modal
                 input.value = '';
+                descriptionInput.value = '';
+                document.querySelectorAll('#taskLabelsGrid input[type="checkbox"]').forEach(cb => cb.checked = false);
+                closeTaskModal();
             } catch (error) {
                 console.error('Error creating task:', error);
                 alert('⚠️ Error creating task with AI. Please check your API key and try again.\n\nError: ' + error.message);
             } finally {
                 btn.disabled = false;
-                btnText.innerHTML = '<i data-lucide="sparkles"></i> Create with AI Magic';
+                btnText.innerHTML = '<i data-lucide="sparkles"></i> AI Magic';
                 lucide.createIcons();
             }
         }
@@ -1645,7 +1806,7 @@
             }
 
             // Get selected labels from checkboxes
-            const selectedLabels = Array.from(document.querySelectorAll('#taskLabelsContainer input[type="checkbox"]:checked'))
+            const selectedLabels = Array.from(document.querySelectorAll('#taskLabelsGrid input[type="checkbox"]:checked'))
                 .map(checkbox => checkbox.value);
 
             const task = {
@@ -1667,10 +1828,11 @@
                 await saveData();
             }
 
+            // Clear inputs and close modal
             input.value = '';
             descriptionInput.value = '';
-            // Uncheck all labels
-            document.querySelectorAll('#taskLabelsContainer input[type="checkbox"]').forEach(cb => cb.checked = false);
+            document.querySelectorAll('#taskLabelsGrid input[type="checkbox"]').forEach(cb => cb.checked = false);
+            closeTaskModal();
             renderTasks();
             lucide.createIcons();
         }
@@ -1803,10 +1965,17 @@ Rules:
 
             const completedSubtasks = task.subtasks.filter(st => st.status === 'done').length;
 
-            // Create labels HTML
+            // Create labels HTML with icons
             const labelsHTML = task.labels && task.labels.length > 0
                 ? `<div class="task-labels">
-                    ${task.labels.map(label => `<span class="task-label label-${label.toLowerCase().replace(' ', '-')}">${label}</span>`).join('')}
+                    ${task.labels.map(labelValue => {
+                    const labelConfig = LABELS.find(l => l.value === labelValue);
+                    if (!labelConfig) return '';
+                    return `<span class="task-label label-${labelConfig.color}">
+                            <i data-lucide="${labelConfig.icon}"></i>
+                            <span>${labelValue}</span>
+                        </span>`;
+                }).join('')}
                    </div>`
                 : '';
 
@@ -2088,10 +2257,12 @@ Rules:
         function openSettings() {
             document.getElementById('apiKeyInput').value = apiKey;
             document.getElementById('settingsModal').classList.add('active');
+            document.body.classList.add('modal-open');
         }
 
         function closeSettings() {
             document.getElementById('settingsModal').classList.remove('active');
+            document.body.classList.remove('modal-open');
         }
 
         async function saveSettings() {
@@ -2117,10 +2288,12 @@ Rules:
             `).join('');
 
             document.getElementById('habitsModal').classList.add('active');
+            document.body.classList.add('modal-open');
         }
 
         function closeHabitsModal() {
             document.getElementById('habitsModal').classList.remove('active');
+            document.body.classList.remove('modal-open');
         }
 
         async function saveHabits() {
@@ -2254,6 +2427,34 @@ Rules:
         window.addEventListener('load', () => {
             init();
             lucide.createIcons();
+
+            // Close modals when clicking outside
+            document.querySelectorAll('.modal').forEach(modal => {
+                modal.addEventListener('click', (e) => {
+                    if (e.target === modal) {
+                        if (modal.id === 'settingsModal') {
+                            closeSettings();
+                        } else if (modal.id === 'habitsModal') {
+                            closeHabitsModal();
+                        } else if (modal.id === 'taskModal') {
+                            closeTaskModal();
+                        }
+                    }
+                });
+            });
+
+            // Close modals with Escape key
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape') {
+                    if (document.getElementById('settingsModal').classList.contains('active')) {
+                        closeSettings();
+                    } else if (document.getElementById('habitsModal').classList.contains('active')) {
+                        closeHabitsModal();
+                    } else if (document.getElementById('taskModal').classList.contains('active')) {
+                        closeTaskModal();
+                    }
+                }
+            });
         });
         setInterval(checkDailyReset, 3600000);
     </script>
